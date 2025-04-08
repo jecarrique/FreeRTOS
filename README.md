@@ -3,5 +3,8 @@
 https://docs.lvgl.io/master/details/integration/chip/espressif.html
 
 # FSM
-![Alt text](./FreeRTOS_TP.svg)
+![Alt text](Estados generales)
 <img src="./FreeRTOS_TP.svg">
+
+![Alt text](Estados antirrebote boton)
+<img src="./FreeRTOS_TP-botones.svg">
