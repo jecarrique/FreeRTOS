@@ -1,4 +1,5 @@
 #include "config.h"
+#include "util.h"
 
 #include "driver/i2c_master.h"
 #include "esp_err.h"
@@ -6,9 +7,8 @@
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_sh1107.h"
 #include "esp_log.h"
-#include "esp_lvgl_port.h"
+
 #include "esp_private/esp_clk.h"
-#include "lvgl.h"
 #include "portmacro.h"
 #include "stdint.h"
 
@@ -19,22 +19,20 @@ static const char *TAG = "TP";
 static const char *TAGW = "warning";
 
 /// prototipo de funciones y declaracion de variables privadas
-typedef struct cuenta_tiempo_t {
-  BaseType_t hh;
-  BaseType_t mm;
-  BaseType_t ss;
-  BaseType_t dd;
-  SemaphoreHandle_t mutex;
-} cuenta_tiempo_t;
-cuenta_tiempo_t tiempo = {0, 0, 0, 0};
 
-lv_disp_t *disp = NULL;
+
+lv_disp_t * disp = NULL;
+
+lv_disp_t * getDisplay(void)
+{
+  return(disp);
+}
+
 void config_gpio_input_pull_up(gpio_input_t pin);
 void config_gpio_output(gpio_output_t pin);
 void delay_loco(uint32_t delay);
 void example_lvgl_demo_ui(void); // lv_disp_t *disp);
-void tskContando(void *parametros);
-void vActualizarDisplay(void);
+
 
 // BaseType_t xGet_lvgl_disp(lv_disp_t *display);
 
@@ -51,7 +49,9 @@ void config_gpio(void) {
 
 void config_lcd(void) {
   /// Creo semaforo para acceder a cuenta del tiempo
-  tiempo.mutex = xSemaphoreCreateMutex();
+  cuenta_tiempo_t * tiempo = getTiempo();
+
+  tiempo->mutex = xSemaphoreCreateMutex();
 
   /// Vamos con el display
   ESP_LOGI(TAG, "Initialize I2C bus");
@@ -161,9 +161,6 @@ BaseType_t xConfig_test(void) {
   delay_loco(2);
   gpio_set_level(LED_VERDE, 0);
 
-  xTaskCreate(tskContando, "CONTANDO", configMINIMAL_STACK_SIZE * 4, NULL,
-              tskIDLE_PRIORITY + 2, NULL);
-
   return (1);
 }
 
@@ -197,7 +194,9 @@ void example_lvgl_demo_ui(void) { // lv_disp_t *disp) {
   // LV_STATE_DEFAULT, &lv_font_unscii_16); lv_style_set_text_font(&style,
   // &lv_font_unscii_16); lv_style_set_text_font(&my_style,
   // &lv_font_montserrat_28);  /* Set a larger font */
-  lv_obj_t *scr = lv_disp_get_scr_act(disp);
+  //lv_disp_t *disp_new = NULL;
+  
+  lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
   lv_obj_t *label = lv_label_create(scr);
 
   lv_style_init(&style);
@@ -214,11 +213,13 @@ void example_lvgl_demo_ui(void) { // lv_disp_t *disp) {
                                               // /* Circular scroll */
 
   lv_label_set_text(label2, "20:20"); // Espressif, Hello LVGL.");
+  cuenta_tiempo_t * tiempo = getTiempo(); 
+
   if (flag == true) {
 
     // lv_label_set_text(label, "18:00"); // Espressif, Hello LVGL.");
-    lv_label_set_text_fmt(label, "%02d:%02d:%02d", tiempo.mm, tiempo.ss,
-                          tiempo.dd);
+    lv_label_set_text_fmt(label, "%02d:%02d:%02d", tiempo->mm, tiempo->ss,
+                          tiempo->dd);
     // lv_label_set_text(label, ":"); // Espressif, Hello LVGL.");
     flag = false;
     ESP_LOGI(TAG, "True");
@@ -227,8 +228,8 @@ void example_lvgl_demo_ui(void) { // lv_disp_t *disp) {
     // lv_label_set_text(label, ""); // Espressif, Hello LVGL.");
 
     // lv_label_set_text(label, "18 00"); // Espressif, Hello LVGL.");
-    lv_label_set_text_fmt(label, "%02d:%02d:%02d", tiempo.mm, tiempo.ss,
-                          tiempo.dd);
+    lv_label_set_text_fmt(label, "%02d:%02d:%02d", tiempo->mm, tiempo->ss,
+                          tiempo->dd);
 
     flag = true;
     ESP_LOGI(TAG, "False");
@@ -247,6 +248,10 @@ void example_lvgl_demo_ui(void) { // lv_disp_t *disp) {
 // }
 // tiempo.horas = 0
 
+
+
+
+/*
 void tskContando(void *parametros) {
 
   /// manejo el contador
@@ -295,7 +300,7 @@ void tskContando(void *parametros) {
 
 void vActualizarDisplay(void) {
   static lv_style_t style;
-  lv_obj_t *scr = lv_disp_get_scr_act(disp);
+  lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
   lv_obj_t *label = lv_label_create(scr);
 
   lv_style_init(&style);
@@ -307,3 +312,5 @@ void vActualizarDisplay(void) {
   lv_label_set_text_fmt(label, "%02d:%02d:%01d", tiempo.mm, tiempo.ss,
                         tiempo.dd);
 }
+
+*/

@@ -3,6 +3,10 @@
 #include "freertos/idf_additions.h"
 #include "portmacro.h"
 
+#include "esp_lvgl_port.h"
+#include "lvgl.h"
+
+
 typedef enum {
   BTN_0 = GPIO_NUM_0,
   BTN_1 = GPIO_NUM_1,
@@ -16,6 +20,8 @@ typedef enum {
 } gpio_output_t;
 
 void config_gpio(void);
+
+lv_disp_t * getDisplay(void);
 
 void config_lcd(void);
 
