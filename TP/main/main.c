@@ -1,3 +1,4 @@
+#include "comun.h"
 #include "config.h"
 #include "util.h"
 
