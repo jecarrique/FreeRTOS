@@ -26,4 +26,10 @@ typedef enum {
     SemaphoreHandle_t mutex;
   } cuenta_tiempo_t;
 
+  typedef struct tiempo_t {
+    BaseType_t hh;
+    BaseType_t mm;
+    BaseType_t ss;
+    BaseType_t dd;
+  } tiempo_t;  
 #endif /* COMUN_H */
