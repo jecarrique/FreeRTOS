@@ -1,11 +1,5 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/idf_additions.h"
-#include "portmacro.h"
-
-#include "esp_lvgl_port.h"
-#include "lvgl.h"
-
-
+#ifndef CONFIG_H
+#define CONFIG_H
 
 void config_gpio(void);
 
@@ -15,3 +9,4 @@ void config_lcd(void);
 
 BaseType_t xConfig_test(void);
 
+#endif /* CONFIG_H */

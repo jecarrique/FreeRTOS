@@ -1,7 +1,9 @@
 #ifndef COMUN_H
 #define COMUN_H
 // === tipos comunes ===
+
 #include "freertos/FreeRTOS.h"
+#include "esp_lvgl_port.h"
 #include "driver/gpio.h"
 
 typedef enum {
