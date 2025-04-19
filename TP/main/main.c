@@ -1,4 +1,5 @@
 #include "comun.h"
+#include "clock.h"
 #include "config.h"
 #include "util.h"
 
@@ -8,6 +9,8 @@
 
 void app_main(void) {
   TaskHandle_t hndlTskToSuspend;
+
+  init_time(); // 2do cheq err
   config_gpio();
   config_lcd();
   //xConfig_test();

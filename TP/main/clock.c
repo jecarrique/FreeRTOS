@@ -2,14 +2,14 @@
 
 #include "clock.h"
 
-cuenta_tiempo_t tiempo = {0, 0, 0, 0};
+cuenta_tiempo_t clock = {0, 0, 0, 0};
 #define ESPERA_MUTEX 1
 
 // crea mutex y nicializa reloj en 0
 BaseType_t init_time(void) {
   BaseType_t err = -1; // error
-  tiempo.mutex = xSemaphoreCreateMutex();
-  if (tiempo.mutex != NULL) {
+  clock.mutex = xSemaphoreCreateMutex();
+  if (clock.mutex != NULL) {
     err = 0; // OK
   }
   return (err);
@@ -17,29 +17,31 @@ BaseType_t init_time(void) {
 // incrementa las decimas del reloj
 BaseType_t inc_time(void) {
   BaseType_t err = -1; // error
-  if (xSemaphoreTake(tiempo.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
-    if (tiempo.dd >= 9) {
-      tiempo.dd = 0;
-      if (tiempo.ss >= 59) {
-        tiempo.ss = 0;
-        if (tiempo.mm >= 59) {
-          tiempo.mm = 0;
-          if (tiempo.hh >= 23) {
-            tiempo.hh = 0;
+  if (xSemaphoreTake(clock.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    if (clock.dd >= 9) {
+      clock.dd = 0;
+      if (clock.ss >= 59) {
+        clock.ss = 0;
+        if (clock.mm >= 59) {
+          clock.mm = 0;
+          if (clock.hh >= 23) {
+            clock.hh = 0;
             /// overflow del contador...
           } else {
-            ++tiempo.hh;
+            ++clock.hh;
           }
         } else {
-          ++tiempo.mm;
+          ++clock.mm;
         }
       } else {
-        ++tiempo.ss;
+        ++clock.ss;
       }
     } else {
-      ++tiempo.dd;
+      ++clock.dd;
     }
-    err = 0; // OK
+    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+      err = 0; // OK
+    }
   }
 
   return (err);
@@ -47,12 +49,14 @@ BaseType_t inc_time(void) {
 // pone en cero el reloj
 BaseType_t rst_time(void) {
   BaseType_t err = -1; // error
-  if (xSemaphoreTake(tiempo.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
-    tiempo.dd = 0;
-    tiempo.ss = 0;
-    tiempo.mm = 0;
-    tiempo.hh = 0;
-    err = 0; // OK
+  if (xSemaphoreTake(clock.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    clock.dd = 0;
+    clock.ss = 0;
+    clock.mm = 0;
+    clock.hh = 0;
+    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+      err = 0; // OK
+    }
   }
 
   return (err);
@@ -60,13 +64,15 @@ BaseType_t rst_time(void) {
 // devuelve el tiempo actual del reloj
 BaseType_t get_time(tiempo_t *ptrTiempo) {
   BaseType_t err = -1; // error
-  if (xSemaphoreTake(tiempo.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
-    ptrTiempo->dd = tiempo.dd;
-    ptrTiempo->hh = tiempo.hh;
-    ptrTiempo->mm = tiempo.mm;
-    ptrTiempo->ss = tiempo.ss;
+  if (xSemaphoreTake(clock.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    ptrTiempo->dd = clock.dd;
+    ptrTiempo->hh = clock.hh;
+    ptrTiempo->mm = clock.mm;
+    ptrTiempo->ss = clock.ss;
 
-    err = 0; // OK
+    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+      err = 0; // OK
+    }
   }
 
   return (err);
@@ -74,12 +80,14 @@ BaseType_t get_time(tiempo_t *ptrTiempo) {
 // establece un valor determinado para el reloj
 BaseType_t set_time(const tiempo_t *ptrTiempo) {
   BaseType_t err = -1; // error
-  if (xSemaphoreTake(tiempo.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
-    tiempo.dd = ptrTiempo->dd;
-    tiempo.hh = ptrTiempo->hh;
-    tiempo.mm = ptrTiempo->mm;
-    tiempo.ss = ptrTiempo->ss;
-    err = 0; // OK
+  if (xSemaphoreTake(clock.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    clock.dd = ptrTiempo->dd;
+    clock.hh = ptrTiempo->hh;
+    clock.mm = ptrTiempo->mm;
+    clock.ss = ptrTiempo->ss;
+    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+      err = 0; // OK
+    }
   }
 
   return (err);
