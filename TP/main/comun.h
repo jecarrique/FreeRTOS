@@ -1,7 +1,7 @@
 #ifndef COMUN_H
 #define COMUN_H
 // === tipos comunes ===
-
+#include "freertos/FreeRTOS.h"
 #include "driver/gpio.h"
 
 typedef enum {
@@ -15,5 +15,13 @@ typedef enum {
     LED_ROJO = GPIO_NUM_5,
     LED_DUMMY
   } gpio_output_t;
+
+  typedef struct cuenta_tiempo_t {
+    BaseType_t hh;
+    BaseType_t mm;
+    BaseType_t ss;
+    BaseType_t dd;
+    SemaphoreHandle_t mutex;
+  } cuenta_tiempo_t;
 
 #endif /* COMUN_H */
