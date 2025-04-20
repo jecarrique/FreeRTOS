@@ -5,6 +5,8 @@
 #include "freertos/FreeRTOS.h"
 #include "esp_lvgl_port.h"
 #include "driver/gpio.h"
+#include "esp_log.h"
+
 
 typedef enum {
     BTN_0 = GPIO_NUM_0,

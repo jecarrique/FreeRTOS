@@ -39,7 +39,7 @@ BaseType_t inc_time(void) {
     } else {
       ++clock.dd;
     }
-    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+    if (xSemaphoreGive(clock.mutex) == pdTRUE) {
       err = 0; // OK
     }
   }
@@ -54,7 +54,7 @@ BaseType_t rst_time(void) {
     clock.ss = 0;
     clock.mm = 0;
     clock.hh = 0;
-    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+    if (xSemaphoreGive(clock.mutex) == pdTRUE) {
       err = 0; // OK
     }
   }
@@ -70,7 +70,7 @@ BaseType_t get_time(tiempo_t *ptrTiempo) {
     ptrTiempo->mm = clock.mm;
     ptrTiempo->ss = clock.ss;
 
-    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+    if (xSemaphoreGive(clock.mutex) == pdTRUE) {
       err = 0; // OK
     }
   }
@@ -85,7 +85,7 @@ BaseType_t set_time(const tiempo_t *ptrTiempo) {
     clock.hh = ptrTiempo->hh;
     clock.mm = ptrTiempo->mm;
     clock.ss = ptrTiempo->ss;
-    if (xSemaphoreGive(clock.mutex) != pdTRUE) {
+    if (xSemaphoreGive(clock.mutex) == pdTRUE) {
       err = 0; // OK
     }
   }

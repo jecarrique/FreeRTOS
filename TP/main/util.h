@@ -8,6 +8,7 @@ void tskBlink(void *parametros);
 void tskKeys(void * parametres);
 void tskContando(void *parametros);
 
+void vInitDisplay(void);
 void vActualizarDisplay(void);
 
 #endif /* UTIL_H */

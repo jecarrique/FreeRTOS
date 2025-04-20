@@ -8,7 +8,6 @@
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_ops.h"
 #include "esp_lcd_sh1107.h"
-#include "esp_log.h"
 
 #include "esp_private/esp_clk.h"
 #include "portmacro.h"
@@ -142,16 +141,16 @@ void config_lcd(void) {
 
   ESP_LOGI(TAG, "Display LVGL Text");
 
-  if (lvgl_port_lock(0)) {
-    lv_obj_clean(lv_scr_act());
+  //if (lvgl_port_lock(0)) {
+  //  lv_obj_clean(lv_scr_act());
 
     // example_lvgl_demo_ui(); // disp);
     vActualizarDisplay();
 
     // lvgl_boxes(disp);
     //  Release the mutex
-    lvgl_port_unlock();
-  }
+  //  lvgl_port_unlock();
+  //}
 }
 
 BaseType_t xConfig_test(void) {
