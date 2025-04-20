@@ -145,6 +145,8 @@ void config_lcd(void) {
   //  lv_obj_clean(lv_scr_act());
 
     // example_lvgl_demo_ui(); // disp);
+    vInitDisplay();
+
     vActualizarDisplay();
 
     // lvgl_boxes(disp);

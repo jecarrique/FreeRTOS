@@ -68,10 +68,10 @@ void tskKeys(void *parametres) {
             tiempo.hh = 0;
             xSemaphoreGive(tiempo.mutex);
 
-            //if (lvgl_port_lock(0)) {
-            //  lv_obj_clean(lv_scr_act());
+            // if (lvgl_port_lock(0)) {
+            //   lv_obj_clean(lv_scr_act());
 
-              vActualizarDisplay();
+            vActualizarDisplay();
 
             //  lvgl_port_unlock();
             //}
@@ -144,10 +144,10 @@ void tskContando(void *parametros) {
       } else {
         ++tiempo.dd;
       }
-      //if (lvgl_port_lock(0)) {
-      //  lv_obj_clean(lv_scr_act());
+      // if (lvgl_port_lock(0)) {
+      //   lv_obj_clean(lv_scr_act());
 
-        vActualizarDisplay();
+      vActualizarDisplay();
 
       //  lvgl_port_unlock();
       //}
@@ -173,22 +173,11 @@ lv_obj_t *label;
 lv_style_t style;
 
 void vInitDisplay(void) {
-
-}
-
-void vActualizarDisplay(void) {
-  static bool flag = true;
-
-  bool mutex = lvgl_port_lock(0); 
+  bool mutex = lvgl_port_lock(0);
   if (mutex) {
-//lv_obj_clean(lv_scr_act());
+    lv_obj_t *scr_tmp = lv_disp_get_scr_act(getDisplay());
+    scr = scr_tmp;
 
-
-    if (flag) {
-      flag = false;
-      lv_obj_t *scr_tmp = lv_disp_get_scr_act(getDisplay());
-      scr = scr_tmp;
-    
     lv_obj_t *label_tmp = lv_label_create(scr);
     label = label_tmp;
 
@@ -199,18 +188,34 @@ void vActualizarDisplay(void) {
     lv_label_set_long_mode(
         label,
         LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
-      }
+    lvgl_port_unlock();
+  } else {
+    ESP_LOGI("err", "mutex del display no disponible");
+  }
+}
+
+void vActualizarDisplay(void) {
+  static bool flag = true;
+
+  if (flag) {
+ //   vInitDisplay();
+    flag = false;
+  }
+  bool mutex = lvgl_port_lock(0);
+  if (mutex) {
+    // lv_obj_clean(lv_scr_act());
+
+  
     //    lv_label_set_text(label, "--:--:-");
     lv_label_set_text_fmt(label, "%02d:%02d:%01d", tiempo.mm, tiempo.ss,
                           tiempo.dd);
     //  Release the mutex
-    //lv_label_refr_text(label);
-    //lv_refr_now(NULL);
-    //lv_obj_invalidate(label);
-    
+    // lv_label_refr_text(label);
+    // lv_refr_now(NULL);
+    // lv_obj_invalidate(label);
+
     lvgl_port_unlock();
-  }
-  else {
-    ESP_LOGI("err","mutex del display no disponible");
+  } else {
+    ESP_LOGI("err", "mutex del display no disponible");
   }
 }
