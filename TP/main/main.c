@@ -2,6 +2,7 @@
 #include "clock.h"
 #include "config.h"
 #include "util.h"
+#include "keyboard.h"
 
 
 #include <stdio.h>
@@ -12,6 +13,7 @@ void app_main(void) {
 
   init_time(); // 2do cheq err
   config_gpio();
+  keyboard_init();
   config_lcd();
   //xConfig_test();
   

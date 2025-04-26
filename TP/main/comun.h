@@ -7,6 +7,9 @@
 #include "driver/gpio.h"
 #include "esp_log.h"
 
+#include "soc/gpio_reg.h" // lectura directa a registro de gpio
+#include <stdint.h>       // tipos de datos estandar
+
 
 typedef enum {
     BTN_0 = GPIO_NUM_0,
@@ -14,6 +17,7 @@ typedef enum {
     BTN_2 = GPIO_NUM_2
   } gpio_input_t;
   
+
   typedef enum {
     LED_VERDE = GPIO_NUM_4,
     LED_ROJO = GPIO_NUM_5,

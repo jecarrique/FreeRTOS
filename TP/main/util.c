@@ -1,5 +1,7 @@
 #include "comun.h"
 
+#include "display.h"
+
 #include "clock.h"
 #include "config.h"
 #include "util.h"
@@ -168,15 +170,15 @@ void tskContando(void *parametros) {
 }
 
 /// --- helper fuction
-lv_obj_t *scr;
 lv_obj_t *label;
-lv_style_t style;
 
 void vInitDisplay(void) {
-  bool mutex = lvgl_port_lock(0);
+  // init_display();
+
+  bool mutex = lvgl_port_lock(100);
   if (mutex) {
-    lv_obj_t *scr_tmp = lv_disp_get_scr_act(getDisplay());
-    scr = scr_tmp;
+    lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
+    static lv_style_t style;
 
     lv_obj_t *label_tmp = lv_label_create(scr);
     label = label_tmp;
@@ -195,6 +197,8 @@ void vInitDisplay(void) {
 }
 
 void vActualizarDisplay(void) {
+  //update_display();
+
   static bool flag = true;
 
   if (flag) {
@@ -218,4 +222,5 @@ void vActualizarDisplay(void) {
   } else {
     ESP_LOGI("err", "mutex del display no disponible");
   }
+  
 }
