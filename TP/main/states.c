@@ -17,6 +17,23 @@ typedef enum {
 void tskStates(void *parametros) {
   static state_reloj_t states = RELOJ_IDLE;
   uint32_t ulInterruptStatus;
+
+  /// creo timer para contar
+  TimerHandle_t xTimerContadorCronometro; /// creo puntero a timer
+  xTimerContadorCronometro = xTimerCreate(
+    /* Text name for the software timer - not used by FreeRTOS. */
+    "timerContadorCronometro",
+    /* The software timer's period in ticks. */
+    pdMS_TO_TICKS(100),
+    /* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
+    pdTRUE,
+    /* This example does not use the timer id. */
+    0,
+    /* Callback function to be used by the software timer being created. */
+    vTimerCallback_ContadorCronometro);
+
+    //xTimerStop( xTimerContadorCronometro, 0 );
+
   for (;;) {
     xTaskNotifyWaitIndexed(
         0,                  /* Wait for 0th Notificaition */
@@ -35,12 +52,14 @@ void tskStates(void *parametros) {
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
       }
     case CRONOMETRO_IDLE:
+      
       ESP_LOGI("Estado Actual", "CRONOMETRO_IDLE");
       // espero boton BTN_UP -> inicio de cuenta,  states = CRONOMETRO_CONTANDO;
       // espero boton BTN_ACT -> Cambia a modo reloj (futuro)
 
       if (BTN_UP == ulInterruptStatus) {
         states = CRONOMETRO_CONTANDO;
+        xTimerReset( xTimerContadorCronometro, 10 ); // se resetea el timer
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
 
         break;
@@ -54,6 +73,8 @@ void tskStates(void *parametros) {
 
         if (BTN_UP == ulInterruptStatus) {
           states = CRONOMETRO_DETENIDO;
+          xTimerStop( xTimerContadorCronometro, 10 ); // se detiene el timer
+          
           ESP_LOGI("Estado Nuevo", "CRONOMETRO_DETENIDO");
 
           break;
@@ -67,6 +88,7 @@ void tskStates(void *parametros) {
 
           if (BTN_UP == ulInterruptStatus) {
             states = CRONOMETRO_CONTANDO;
+            xTimerReset( xTimerContadorCronometro, 10 ); // se resetea el timer
             ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
 
           } else if (BTN_ACT == ulInterruptStatus) {
