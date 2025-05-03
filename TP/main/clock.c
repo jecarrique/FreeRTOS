@@ -93,6 +93,10 @@ BaseType_t set_time(const tiempo_t *ptrTiempo) {
   return (err);
 }
 
+void vTimerCallback_ContadorCronometro(TimerHandle_t xTimer) {
+  ESP_LOGW("Incremento contador cronometro", "Vamo arriba");
+}
+
 /// === tarea que genera la cuenta en el cronometro ===
 void tskContadorCronometro(void *parametros) {
   TickType_t *ultimo_evento = (TickType_t *)parametros;
@@ -106,3 +110,4 @@ void tskContadorCronometro(void *parametros) {
       ESP_LOGW("ATENCION", "FALLO vTaskDelayUntil");
   }
 }
+
