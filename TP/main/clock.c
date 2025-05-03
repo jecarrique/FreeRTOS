@@ -92,3 +92,17 @@ BaseType_t set_time(const tiempo_t *ptrTiempo) {
 
   return (err);
 }
+
+/// === tarea que genera la cuenta en el cronometro ===
+void tskContadorCronometro(void *parametros) {
+  TickType_t *ultimo_evento = (TickType_t *)parametros;
+  // ultimo_evento = xTaskGetTickCount();
+  for (;;) {
+    inc_time();
+    BaseType_t xWasDelayed =
+        xTaskDelayUntil((void* )ultimo_evento, pdMS_TO_TICKS(100));
+
+    if (xWasDelayed == pdFALSE)
+      ESP_LOGW("ATENCION", "FALLO vTaskDelayUntil");
+  }
+}

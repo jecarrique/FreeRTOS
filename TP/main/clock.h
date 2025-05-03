@@ -6,5 +6,7 @@ BaseType_t inc_time( void ); // incrementa las decimas del reloj
 BaseType_t rst_time( void ); // pone en cero el reloj
 BaseType_t get_time( tiempo_t *ptrTiempo ); // devuelve el tiempo actual del reloj
 BaseType_t set_time( const tiempo_t *ptrTiempo ); // establece un valor determinado para el reloj
+void tskContadorCronometro(void *parametros); // tarea para manejar la cuenta, me gusta la idea de que fuera estatica.
+
 
 #endif /* CLOCK_H */
