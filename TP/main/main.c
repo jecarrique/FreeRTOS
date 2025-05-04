@@ -20,7 +20,7 @@ void app_main(void) {
   init_leds();
   //xConfig_test();
   
-  gpio_set_level(LED_ROJO, 1);
+  //gpio_set_level(LED_ROJO, 1);
 
   
   vTaskSuspendAll();  /// prevengo que las tareas tomen el CPU al ser creadas

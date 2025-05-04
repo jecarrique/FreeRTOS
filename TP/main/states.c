@@ -84,6 +84,7 @@ void tskStates(void *parametros) {
         get_time(&tiempo.partes);
         ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
                  tiempo.partes.ss, tiempo.partes.dd);
+                 update_display_gral(); // borro display general
         update_display_crono();
       }
       break;

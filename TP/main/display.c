@@ -5,6 +5,8 @@
 #include "config.h" // getDisplay
 
 #include "clock.h" // getTime
+#include "font/lv_font.h"
+#include "freertos/idf_additions.h"
 
 BaseType_t config_display(void) {
   BaseType_t err = -1; // error
@@ -16,6 +18,7 @@ BaseType_t config_display(void) {
 
 lv_obj_t *label_clock;
 static lv_obj_t *label;
+static lv_obj_t *lblGral;
 static lv_obj_t *lblCrono;
 static lv_obj_t *lblLap0;
 static lv_obj_t *lblLap1;
@@ -44,7 +47,9 @@ BaseType_t init_lbl_laps(void) {
                      0); // <--- obj is the label
     lv_obj_set_pos(*labelsLaps[i], 0,
                    8 * i + 8); // el origen esta arriba a la ezquierda
-    lv_label_set_text(*labelsLaps[i], "88:88:8  88:88:8");
+    //lv_label_set_text(*labelsLaps[i], "88:88:8  88:88:8");
+    lv_label_set_text(*labelsLaps[i], ""); // label vacio
+
     // lv_label_set_long_mode(
     //     label,
     //     LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
@@ -84,7 +89,8 @@ BaseType_t init_lbl_crono(void) {
   //                        LV_LABEL_LONG_SCROLL_CIRCULAR);
   lv_obj_set_pos(lblCrono, 0,
                  0); // el origen esta arriba a la ezquierda
-  lv_label_set_text(lblCrono, "22:22:2");
+  //lv_label_set_text(lblCrono, "22:22:2");
+  lv_label_set_text(lblCrono, ""); // label vacio
   return (err);
 }
 
@@ -102,15 +108,18 @@ BaseType_t init_lbl_gral(void) {
     ESP_LOGI("err", "label note created");
   }
 
-  label = label_tmp;
+  lblGral = label_tmp;
 
   lv_style_init(&style);
-  lv_style_set_text_font(&style, &lv_font_unscii_16);
-  lv_obj_add_style(label, &style, 0); // <--- obj is the label
+  lv_style_set_text_font(&style, &lv_font_montserrat_14);
+  lv_obj_add_style(lblGral, &style, 0); // <--- obj is the label
 
-  lv_label_set_long_mode(label,
-                         LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
-  lv_label_set_text(label, "");
+  //lv_label_set_long_mode(label,
+  //                       LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
+ lv_obj_set_pos(lblGral, 0,
+  0); // el origen esta arriba a la ezquierda
+  lv_label_set_text(lblGral, "CRONOMETRO \n presione accion");
+  ESP_LOGI("display init", "escribo CRONOMETRO");
   return (err);
 }
 
@@ -118,10 +127,9 @@ BaseType_t init_display(void) {
   BaseType_t err = -1; // error
   bool mutex = lvgl_port_lock(100);
   if (mutex) {
-    err = init_lbl_gral();
     err = init_lbl_laps();
     err = init_lbl_crono();
-
+    err = init_lbl_gral();
     lvgl_port_unlock();
   } else {
     ESP_LOGI("err", "mutex del display no disponible");
@@ -143,10 +151,41 @@ BaseType_t update_display(void) {
     // lv_refr_now(NULL);
     // lv_obj_invalidate(label);
 
-    tiempo_comm_t tiempo;
-    get_time(&tiempo.partes);
+    //tiempo_comm_t tiempo;
+    //get_time(&tiempo.partes);
     // lv_label_set_text_fmt(lblCrono, "%02d:%02d:%01d", tiempo.partes.mm,
     //                       tiempo.partes.ss, tiempo.partes.dd);
+    //lv_label_set_text(label, ""); // borro texto inicial
+
+    lvgl_port_unlock();
+    err = 0; // OK
+
+  } else {
+    ESP_LOGI("err", "mutex del display no disponible");
+  }
+
+  return (err);
+}
+
+BaseType_t update_display_gral(void) {
+  BaseType_t err = -1; // error
+  bool mutex = lvgl_port_lock(0);
+  if (mutex) {
+    // lv_obj_clean(lv_scr_act());
+
+    //    lv_label_set_text(label, "--:--:-");
+    // lv_label_set_text_fmt(label, "%02d:%02d:%01d", tiempo.mm, tiempo.ss,
+    //                      tiempo.dd);
+    //  Release the mutex
+    // lv_label_refr_text(label);
+    // lv_refr_now(NULL);
+    // lv_obj_invalidate(label);
+
+    //tiempo_comm_t tiempo;
+    //get_time(&tiempo.partes);
+    // lv_label_set_text_fmt(lblCrono, "%02d:%02d:%01d", tiempo.partes.mm,
+    //                       tiempo.partes.ss, tiempo.partes.dd);
+    lv_label_set_text(lblGral, ""); // borro texto inicial
 
     lvgl_port_unlock();
     err = 0; // OK
