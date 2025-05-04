@@ -32,10 +32,16 @@ typedef enum {
     SemaphoreHandle_t mutex;
   } cuenta_tiempo_t;
 
+  
   typedef struct tiempo_t {
-    BaseType_t hh;
-    BaseType_t mm;
-    BaseType_t ss;
-    BaseType_t dd;
+    uint8_t hh;
+    uint8_t mm;
+    uint8_t ss;
+    uint8_t dd;
   } tiempo_t;  
+
+  typedef union tiempo_comm_t {
+    uint32_t todo;
+    tiempo_t partes;
+  } tiempo_comm_t;
 #endif /* COMUN_H */

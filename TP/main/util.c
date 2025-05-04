@@ -119,7 +119,9 @@ void tskContando(void *parametros) {
   ultimo_evento = xTaskGetTickCount();
 
   for (;;) {
-    err = inc_time();
+    tiempo_comm_t contador;
+    err = inc_time(&contador.partes);
+    //err = inc_time();
     if (err != 0) {
       ESP_LOGI("error", "fallo incremento de cuenta en el clock");
     }
@@ -173,8 +175,8 @@ void tskContando(void *parametros) {
 lv_obj_t *label;
 
 void vInitDisplay(void) {
-  // init_display();
-
+   init_display();
+/*
   bool mutex = lvgl_port_lock(100);
   if (mutex) {
     lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
@@ -194,11 +196,12 @@ void vInitDisplay(void) {
   } else {
     ESP_LOGI("err", "mutex del display no disponible");
   }
+*/
 }
 
 void vActualizarDisplay(void) {
-  //update_display();
-
+  update_display();
+/*
   static bool flag = true;
 
   if (flag) {
@@ -222,5 +225,5 @@ void vActualizarDisplay(void) {
   } else {
     ESP_LOGI("err", "mutex del display no disponible");
   }
-  
+ */ 
 }

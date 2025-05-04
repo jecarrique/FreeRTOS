@@ -2,6 +2,7 @@
 #include "esp_log.h"
 
 #include "clock.h"
+#include "display.h"
 #include "states.h"
 
 #define BTN_ACT BTN_0
@@ -18,22 +19,44 @@ void tskStates(void *parametros) {
   static state_reloj_t states = RELOJ_IDLE;
   uint32_t ulInterruptStatus;
 
+  /// creo reloj
+  init_time();
+
   /// creo timer para contar
   TimerHandle_t xTimerContadorCronometro; /// creo puntero a timer
   xTimerContadorCronometro = xTimerCreate(
-    /* Text name for the software timer - not used by FreeRTOS. */
-    "timerContadorCronometro",
-    /* The software timer's period in ticks. */
-    pdMS_TO_TICKS(100),
-    /* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
-    pdTRUE,
-    /* This example does not use the timer id. */
-    0,
-    /* Callback function to be used by the software timer being created. */
-    vTimerCallback_ContadorCronometro);
+      /* Text name for the software timer - not used by FreeRTOS. */
+      "timerContadorCronometro",
+      /* The software timer's period in ticks. */
+      pdMS_TO_TICKS(100),
+      /* Setting uxAutoRealod to pdFALSE creates a one-shot software timer. */
+      pdTRUE,
+      /* This example does not use the timer id. */
+      0,
+      /* Callback function to be used by the software timer being created. */
+      vTimerCallback_ContadorCronometro);
 
-    //xTimerStop( xTimerContadorCronometro, 0 );
+  /// --- creo cola para laps y lanzo tare de laps ---
+  static QueueHandle_t xQueueLaps;
+  TaskHandle_t hndlTskLaps;
+  xQueueLaps = xQueueCreate(3, sizeof(tiempo_comm_t));
 
+  ESP_LOGE("Puntero a cola Laps", "%p", &xQueueLaps); 
+  ESP_LOGE("Valor como Puntero a cola Laps", "%p", xQueueLaps);
+  if (NULL == xQueueLaps) {
+    ESP_LOGE("ERROR", "Cola laps no creada");
+  } else {
+    ESP_LOGI("OK", "Cola laps creada");
+  }
+  UBaseType_t cnt = uxQueueMessagesWaiting(xQueueLaps); 
+  
+    ESP_LOGE("", "la cola tiene %u", cnt);
+  
+  xTaskCreate(tskLaps, "LAPS", configMINIMAL_STACK_SIZE * 4, (void *)&xQueueLaps,
+              tskIDLE_PRIORITY + 2, &hndlTskLaps);
+  // tiempo_comm_t tiempo;
+  // BaseType_t rta = xQueueSend(xQueueLaps, (void *) &tiempo, 100);
+  /// lanzo ciclo infinito esperando se presionen las teclas para transicionar
   for (;;) {
     xTaskNotifyWaitIndexed(
         0,                  /* Wait for 0th Notificaition */
@@ -45,25 +68,36 @@ void tskStates(void *parametros) {
     // ESP_LOGI("Boton recivido", "%lu\n", (unsigned long)ulInterruptStatus);
 
     switch (states) {
+      ///-----------------------------------------------------------------
     case RELOJ_IDLE: // por ahora no hacenada.
       ESP_LOGI("Estado Actual", "RELOJ_IDLE");
       if (BTN_ACT == ulInterruptStatus) {
         states = CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
+        rst_time();
+        reset_display_crono_labels();
+
+        tiempo_comm_t tiempo;
+        get_time(&tiempo.partes);
+        ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
+                 tiempo.partes.ss, tiempo.partes.dd);
+        update_display_crono();
       }
+      break;
+      ///-----------------------------------------------------------------
     case CRONOMETRO_IDLE:
-      
+
       ESP_LOGI("Estado Actual", "CRONOMETRO_IDLE");
-      // espero boton BTN_UP -> inicio de cuenta,  states = CRONOMETRO_CONTANDO;
-      // espero boton BTN_ACT -> Cambia a modo reloj (futuro)
+      rst_time();
+      reset_display_crono_labels();
 
       if (BTN_UP == ulInterruptStatus) {
         states = CRONOMETRO_CONTANDO;
-        xTimerReset( xTimerContadorCronometro, 10 ); // se resetea el timer
+        xTimerReset(xTimerContadorCronometro, 10); // se resetea el timer
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
 
         break;
-
+        ///-----------------------------------------------------------------
       case CRONOMETRO_CONTANDO:
         ESP_LOGI("Estado Actual", "CRONOMETRO_CONTANDO");
         /// Creo la tarea de cuenta
@@ -73,31 +107,51 @@ void tskStates(void *parametros) {
 
         if (BTN_UP == ulInterruptStatus) {
           states = CRONOMETRO_DETENIDO;
-          xTimerStop( xTimerContadorCronometro, 10 ); // se detiene el timer
-          
+          xTimerStop(xTimerContadorCronometro, 10); // se detiene el timer
+
           ESP_LOGI("Estado Nuevo", "CRONOMETRO_DETENIDO");
+        } else if (BTN_DOWN == ulInterruptStatus) {
 
-          break;
-
-        case CRONOMETRO_DETENIDO:
-          ESP_LOGI("Estado Actual", "CRONOMETRO_DETENIDO");
-          /// Mato la tarea de cuenta
-          // espero boton BTN_UP -> se reinicia la cuenta general desde donde
-          // estaba y states = CONTANDO; espero boton BTN_ACT -> se borran los
-          // laps y la cuenta se va a cero
-
-          if (BTN_UP == ulInterruptStatus) {
-            states = CRONOMETRO_CONTANDO;
-            xTimerReset( xTimerContadorCronometro, 10 ); // se resetea el timer
-            ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
-
-          } else if (BTN_ACT == ulInterruptStatus) {
-            states = CRONOMETRO_IDLE;
-            ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
+          ESP_LOGI("Mantiene estado", "Manda Lap");
+          tiempo_comm_t tiempo;
+          get_time(&tiempo.partes);
+          ESP_LOGW("Lap", "%02d:%02d:%01d", tiempo.partes.mm, tiempo.partes.ss,
+                   tiempo.partes.dd);
+          update_display_crono();
+          ESP_LOGW("Cola:", "intentando enviar dato");
+          BaseType_t rta = xQueueSend(xQueueLaps, (void *)&tiempo, 100);
+          if (errQUEUE_FULL == rta) {
+            ESP_LOGW("Cola NoOk:", "llena, no se pudo enviar dato");
+          } else {
+            ESP_LOGW("Cola OK:", "se envio dato");
           }
-
-          break;
         }
+        break;
+        ///-----------------------------------------------------------------
+      case CRONOMETRO_DETENIDO:
+        ESP_LOGI("Estado Actual", "CRONOMETRO_DETENIDO");
+        /// Mato la tarea de cuenta
+        // espero boton BTN_UP -> se reinicia la cuenta general desde donde
+        // estaba y states = CONTANDO; espero boton BTN_ACT -> se borran los
+        // laps y la cuenta se va a cero
+
+        if (BTN_UP == ulInterruptStatus) {
+          states = CRONOMETRO_CONTANDO;
+          xTimerReset(xTimerContadorCronometro, 10); // se resetea el timer
+          ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
+
+        } else if (BTN_ACT == ulInterruptStatus) {
+          states = CRONOMETRO_IDLE;
+          ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
+          rst_time();
+          reset_display_crono_labels();
+          tiempo_comm_t tiempo;
+          get_time(&tiempo.partes);
+          ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
+                   tiempo.partes.ss, tiempo.partes.dd);
+          update_display_crono();
+        }
+        break;
       }
     }
   }
