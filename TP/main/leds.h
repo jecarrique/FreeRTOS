@@ -11,7 +11,4 @@ void startActionGreenLed(void);
 void stopActionGreenLed(void);
 
 
-// void hndlTimerLedRojo(void);
-
-
 #endif /* LEDS_H */

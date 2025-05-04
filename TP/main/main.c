@@ -1,11 +1,11 @@
 #include "comun.h"
+
 #include "clock.h"
 #include "config.h"
 #include "util.h"
 #include "keyboard.h"
 #include "states.h"
-
-
+#include "leds.h"
 #include <stdio.h>
 
 
@@ -17,6 +17,7 @@ void app_main(void) {
   keyboard_init();
   init_inputs();
   config_lcd();
+  init_leds();
   //xConfig_test();
   
   gpio_set_level(LED_ROJO, 1);

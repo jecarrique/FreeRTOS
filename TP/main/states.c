@@ -4,6 +4,7 @@
 #include "clock.h"
 #include "display.h"
 #include "states.h"
+#include "leds.h"
 
 #define BTN_ACT BTN_0
 #define BTN_DOWN BTN_1
@@ -22,7 +23,7 @@ void tskStates(void *parametros) {
   /// creo reloj
   init_time();
 
-  /// creo timer para contar
+  /// --- creo timer para contar ---
   TimerHandle_t xTimerContadorCronometro; /// creo puntero a timer
   xTimerContadorCronometro = xTimerCreate(
       /* Text name for the software timer - not used by FreeRTOS. */
@@ -74,6 +75,8 @@ void tskStates(void *parametros) {
       if (BTN_ACT == ulInterruptStatus) {
         states = CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
+        stopActionGreenLed();
+        startActionRedLed();
         rst_time();
         reset_display_crono_labels();
 
@@ -86,13 +89,15 @@ void tskStates(void *parametros) {
       break;
       ///-----------------------------------------------------------------
     case CRONOMETRO_IDLE:
-
+      
       ESP_LOGI("Estado Actual", "CRONOMETRO_IDLE");
       rst_time();
       reset_display_crono_labels();
 
       if (BTN_UP == ulInterruptStatus) {
         states = CRONOMETRO_CONTANDO;
+        startActionGreenLed();
+        stopActionRedLed();
         xTimerReset(xTimerContadorCronometro, 10); // se resetea el timer
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
 
@@ -108,6 +113,8 @@ void tskStates(void *parametros) {
         if (BTN_UP == ulInterruptStatus) {
           states = CRONOMETRO_DETENIDO;
           xTimerStop(xTimerContadorCronometro, 10); // se detiene el timer
+          stopActionGreenLed();
+          startActionRedLed();
 
           ESP_LOGI("Estado Nuevo", "CRONOMETRO_DETENIDO");
         } else if (BTN_DOWN == ulInterruptStatus) {
@@ -139,6 +146,8 @@ void tskStates(void *parametros) {
           states = CRONOMETRO_CONTANDO;
           xTimerReset(xTimerContadorCronometro, 10); // se resetea el timer
           ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
+          startActionGreenLed();
+          stopActionRedLed();
 
         } else if (BTN_ACT == ulInterruptStatus) {
           states = CRONOMETRO_IDLE;
@@ -150,6 +159,8 @@ void tskStates(void *parametros) {
           ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
                    tiempo.partes.ss, tiempo.partes.dd);
           update_display_crono();
+          stopActionGreenLed();
+          startActionRedLed();
         }
         break;
       }
