@@ -27,8 +27,64 @@ static lv_obj_t *lblLap1;
 static lv_obj_t *lblLap2;
 
 /// Menu
-//char texto[] = ">Cambiar Hora \n_Configurar Alarma \n_Iniciar Cronometro";
 static lv_obj_t * lblMenu;
+static lv_obj_t * lblHora;
+static lv_obj_t * lblAlarma;
+
+BaseType_t init_lbl_alarma() {
+
+  BaseType_t err = -1; // error
+  lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
+
+    /// puede devolver NULL si hay un error
+    lv_obj_t *label_tmp = lv_label_create(scr);
+    if (label_tmp != NULL) {
+      err = 0; // OK
+    } else {
+      ESP_LOGI("err", "label note created");
+    }
+
+    lblAlarma = label_tmp;
+    static lv_style_t style;
+
+    lv_style_init(&style);
+    lv_style_set_text_font(&style, &lv_font_unscii_8);
+    lv_obj_add_style(lblAlarma, &style,
+                     0); // <--- obj is the label
+    lv_obj_set_pos(lblAlarma, 0,
+                   16); // el origen esta arriba a la ezquierda
+    lv_label_set_text(lblAlarma, ""); // label vacio
+
+  return (err);
+}
+
+BaseType_t init_lbl_hora() {
+
+  BaseType_t err = -1; // error
+  lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
+
+    /// puede devolver NULL si hay un error
+    lv_obj_t *label_tmp = lv_label_create(scr);
+    if (label_tmp != NULL) {
+      err = 0; // OK
+    } else {
+      ESP_LOGI("err", "label note created");
+    }
+
+    lblHora = label_tmp;
+    static lv_style_t style;
+
+    lv_style_init(&style);
+    lv_style_set_text_font(&style, &lv_font_unscii_16);
+    lv_obj_add_style(lblHora, &style,
+                     0); // <--- obj is the label
+    lv_obj_set_pos(lblHora, 0,
+                   0); // el origen esta arriba a la ezquierda
+    lv_label_set_text(lblHora, ""); // label vacio
+
+  return (err);
+
+}
 
 BaseType_t init_lbl_menu() {
 
@@ -158,7 +214,8 @@ BaseType_t init_lbl_gral(void) {
   // Create a custom style for an inverted label
 
 
-  lv_style_set_text_font(&style, &lv_font_montserrat_10);
+  //lv_style_set_text_font(&style, &lv_font_montserrat_16);
+  lv_style_set_text_font(&style, &lv_font_montserrat_14);
   //lv_style_set_text_color(&style, lv_color_white());
   //lv_style_set_text_color(&style, lv_color_black());
   //lv_style_set_bg_color(&style,lv_color_black());
@@ -168,7 +225,8 @@ BaseType_t init_lbl_gral(void) {
   //                       LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
  lv_obj_set_pos(lblGral, 0,
   0); // el origen esta arriba a la izquierda
-  char texto[] = ">Cambiar Hora \n_Configurar Alarma \n_Iniciar Cronometro";
+  //char texto[] = "Hora 88:88\nAlarm 88:88";
+  char texto[] = "Reloj(A) y Crono\nPresiones Accion";
   lv_label_set_text(lblGral, texto);
   ESP_LOGI("display init", "escribo CRONOMETRO");
   
@@ -188,6 +246,8 @@ BaseType_t init_display(void) {
     err = init_lbl_crono();
     err = init_lbl_gral();
     err = init_lbl_menu();
+    err = init_lbl_hora();
+    err = init_lbl_alarma();
     lvgl_port_unlock();
   } else {
     ESP_LOGI("err", "mutex del display no disponible");

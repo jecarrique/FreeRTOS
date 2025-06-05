@@ -11,6 +11,7 @@
 #define BTN_UP BTN_2
 typedef enum {
   RELOJ_IDLE,
+  RELOJ_ON,
   RELOJ_MENU_0,
   RELOJ_MENU_1,
   RELOJ_MENU_2,
@@ -78,12 +79,22 @@ void tskStates(void *parametros) {
     case RELOJ_IDLE: // por ahora no hacenada.
       ESP_LOGI("Estado Actual", "RELOJ_IDLE");
       if (BTN_ACT == ulInterruptStatus) {
-        states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
-        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+        states = RELOJ_ON; //CRONOMETRO_IDLE;
+        ESP_LOGI("Estado Nuevo", "RELOJ_ON");
         update_display_gral(); // borro display general
         update_display_menu_label(0);
       }
       break;
+            ///-----------------------------------------------------------------
+    case RELOJ_ON: // por ahora no hacenada.
+    ESP_LOGI("Estado Actual", "RELOJ_ON");
+    if (BTN_ACT == ulInterruptStatus) {
+      states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
+      ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+      update_display_gral(); // borro display general
+      update_display_menu_label(0);
+    }
+    break;
       ///-----------------------------------------------------------------
       case RELOJ_MENU_0:
       if (BTN_ACT == ulInterruptStatus) {
@@ -134,8 +145,14 @@ void tskStates(void *parametros) {
         stopActionRedLed();
         xTimerReset(xTimerContadorCronometro, 10); // se resetea el timer
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
-
-        break;
+      }
+      if (BTN_ACT == ulInterruptStatus) {
+        states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
+        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+        update_display_gral(); // borro display general
+        update_display_menu_label(0);
+      }  
+      break;
         ///-----------------------------------------------------------------
       case CRONOMETRO_CONTANDO:
         ESP_LOGI("Estado Actual", "CRONOMETRO_CONTANDO");
@@ -197,7 +214,7 @@ void tskStates(void *parametros) {
           startActionRedLed();
         }
         break;
-      }
+      
     }
   }
 }
