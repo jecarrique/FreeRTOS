@@ -31,7 +31,7 @@ static lv_obj_t * lblMenuHora;
 static lv_obj_t * lblMenuAlarma;
 static lv_obj_t * lblMenuCronometro;
 
-BaseType_t init_lbl_menu(unsigned int menu_selsect) {
+BaseType_t init_lbl_menu() {
 
   BaseType_t err = -1; // error
   lv_obj_t **labelsMenu[] = {&lblMenuHora, &lblMenuAlarma, &lblMenuCronometro};
@@ -197,6 +197,7 @@ BaseType_t init_display(void) {
     err = init_lbl_laps();
     err = init_lbl_crono();
     err = init_lbl_gral();
+    err = init_lbl_menu();
     lvgl_port_unlock();
   } else {
     ESP_LOGI("err", "mutex del display no disponible");
@@ -333,4 +334,38 @@ BaseType_t update_display_crono_label(unsigned int label_num, tiempo_comm_t tiem
   }
 
   return (err);
+}
+
+/// --- Menu ---
+
+BaseType_t update_display_menu_label(unsigned int menu_selsect) {
+  BaseType_t err = -1; // error
+  
+  bool mutex = lvgl_port_lock(0);
+  char text_menu[][20] = {"_Ir al Cronometro","_Modificar Hora" , "_Modificar Alarma"};
+  lv_obj_t **labelsMenu[] = {&lblMenuHora, &lblMenuAlarma, &lblMenuCronometro};
+
+  if (mutex) {
+
+    // get_time(&tiempo.partes);
+    // lv_label_set_text_fmt(lblCrono, "%02d:%02d:%01d", tiempo.partes.mm,
+    //                        tiempo.partes.ss, tiempo.partes.dd);
+    for (int i = 0; i < 3; i++) {
+      if (i == menu_selsect ) {
+        text_menu[i][0] = '>';
+      }
+      lv_label_set_text(*labelsMenu[i], text_menu[i]);
+
+    }
+  
+    err = 0; // OK
+    lvgl_port_unlock();
+  }
+  else {
+    lvgl_port_unlock();
+    err = -1; // error
+    ESP_LOGI("err", "mutex del display no disponible");
+  }
+  return (err);
+
 }
