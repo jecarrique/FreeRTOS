@@ -120,7 +120,7 @@ void tskContando(void *parametros) {
 
   for (;;) {
     tiempo_comm_t contador;
-    err = inc_time(&contador.partes);
+    err = inc_crono(&contador.partes);
     //err = inc_time();
     if (err != 0) {
       ESP_LOGI("error", "fallo incremento de cuenta en el clock");

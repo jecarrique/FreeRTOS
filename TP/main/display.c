@@ -327,7 +327,7 @@ BaseType_t update_display_crono(void) {
   if (mutex) {
 
     tiempo_comm_t tiempo;
-    get_time(&tiempo.partes);
+    get_crono(&tiempo.partes);
     lv_label_set_text_fmt(lblCrono, "%02d:%02d:%01d", tiempo.partes.mm,
                           tiempo.partes.ss, tiempo.partes.dd);
 

@@ -102,12 +102,12 @@ void tskStates(void *parametros) {
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
         stopActionGreenLed();
         startActionRedLed();
-        rst_time();
+        rst_crono();
         update_display_gral(); // borro display general
         reset_display_crono_labels();
 
         tiempo_comm_t tiempo;
-        get_time(&tiempo.partes);
+        get_crono(&tiempo.partes);
         ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
                  tiempo.partes.ss, tiempo.partes.dd);
                  update_display_gral(); // borro display general
@@ -136,14 +136,14 @@ void tskStates(void *parametros) {
     case CRONOMETRO_IDLE:
       
       ESP_LOGI("Estado Actual", "CRONOMETRO_IDLE");
-      rst_time();
+      rst_crono(); // Borro valr del contador
       reset_display_crono_labels();
 
       if (BTN_UP == ulInterruptStatus) {
         states = CRONOMETRO_CONTANDO;
         startActionGreenLed();
         stopActionRedLed();
-        xTimerReset(xTimerContadorCronometro, 10); // se resetea el timer
+        xTimerStart(xTimerContadorCronometro, 10); // se resetea el timer
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
       }
       if (BTN_ACT == ulInterruptStatus) {
@@ -172,7 +172,7 @@ void tskStates(void *parametros) {
 
           ESP_LOGI("Mantiene estado", "Manda Lap");
           tiempo_comm_t tiempo;
-          get_time(&tiempo.partes);
+          get_crono(&tiempo.partes);
           ESP_LOGW("Lap", "%02d:%02d:%01d", tiempo.partes.mm, tiempo.partes.ss,
                    tiempo.partes.dd);
           update_display_crono();
@@ -203,10 +203,10 @@ void tskStates(void *parametros) {
         } else if (BTN_ACT == ulInterruptStatus) {
           states = CRONOMETRO_IDLE;
           ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
-          rst_time();
+          rst_crono();
           reset_display_crono_labels();
           tiempo_comm_t tiempo;
-          get_time(&tiempo.partes);
+          get_crono(&tiempo.partes);
           ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
                    tiempo.partes.ss, tiempo.partes.dd);
           update_display_crono();
