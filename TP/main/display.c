@@ -7,6 +7,8 @@
 #include "clock.h" // getTime
 #include "font/lv_font.h"
 #include "freertos/idf_additions.h"
+#include "misc/lv_style.h"
+#include "misc/lv_style_gen.h"
 
 BaseType_t config_display(void) {
   BaseType_t err = -1; // error
@@ -23,6 +25,53 @@ static lv_obj_t *lblCrono;
 static lv_obj_t *lblLap0;
 static lv_obj_t *lblLap1;
 static lv_obj_t *lblLap2;
+
+/// Menu
+static lv_obj_t * lblMenuHora;
+static lv_obj_t * lblMenuAlarma;
+static lv_obj_t * lblMenuCronometro;
+
+BaseType_t init_lbl_menu(unsigned int menu_selsect) {
+
+  BaseType_t err = -1; // error
+  lv_obj_t **labelsMenu[] = {&lblMenuHora, &lblMenuAlarma, &lblMenuCronometro};
+  static lv_style_t stylesMenu[2];
+  lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
+
+  for (int i = 0; i < 2; i++) {
+    /// puede devolver NULL si hay un error
+    lv_obj_t *label_tmp = lv_label_create(scr);
+    if (label_tmp != NULL) {
+      err = 0; // OK
+    } else {
+      ESP_LOGI("err", "label note created");
+    }
+
+    *labelsMenu[i] = label_tmp;
+
+    lv_style_init(&stylesMenu[i]);
+    lv_style_set_text_font(&stylesMenu[i], &lv_font_montserrat_12);
+    lv_obj_add_style(*labelsMenu[i], &stylesMenu[i],
+                     0); // <--- obj is the label
+    lv_obj_set_pos(*labelsMenu[i], 0,
+                   8 * i + 8); // el origen esta arriba a la ezquierda
+    //lv_label_set_text(*labelsLaps[i], "88:88:8  88:88:8");
+    lv_label_set_text(*labelsMenu[i], ""); // label vacio
+
+    // lv_label_set_long_mode(
+    //     label,
+    //     LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
+  }
+  ESP_LOGW("puntero a label Lap0 array", "%p", *labelsMenu[0]);
+  ESP_LOGW("puntero a label Lap0 ", "%p", lblMenuHora);
+  ESP_LOGW("puntero a label Lap1 array", "%p", *labelsMenu[1]);
+  ESP_LOGW("puntero a label Lap1 ", "%p", lblMenuAlarma);
+  ESP_LOGW("puntero a label Lap2 array", "%p", *labelsMenu[2]);
+  ESP_LOGW("puntero a label Lap2 ", "%p", lblMenuCronometro);  
+
+  return (err);
+
+}
 
 BaseType_t init_lbl_laps(void) {
   BaseType_t err = -1; // error
@@ -98,6 +147,10 @@ BaseType_t init_lbl_gral(void) {
   BaseType_t err = -1; // error
 
   lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
+
+
+  
+  /*
   static lv_style_t style;
 
   /// puede devolver NULL si hay un error
@@ -111,16 +164,30 @@ BaseType_t init_lbl_gral(void) {
   lblGral = label_tmp;
 
   lv_style_init(&style);
-  lv_style_set_text_font(&style, &lv_font_montserrat_14);
+
+  // Create a custom style for an inverted label
+
+
+  lv_style_set_text_font(&style, &lv_font_montserrat_12);
+  //lv_style_set_text_color(&style, lv_color_white());
+  lv_style_set_text_color(&style, lv_color_black());
+  //lv_style_set_bg_color(&style,lv_color_black());
   lv_obj_add_style(lblGral, &style, 0); // <--- obj is the label
 
   //lv_label_set_long_mode(label,
   //                       LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
  lv_obj_set_pos(lblGral, 0,
   0); // el origen esta arriba a la ezquierda
-  lv_label_set_text(lblGral, "CRONOMETRO \n presione accion");
+  char texto[] = ">Cambiar Hora \n_Configurar Alarma \n_Iniciar Cronometro";
+  lv_label_set_text(lblGral, texto);
   ESP_LOGI("display init", "escribo CRONOMETRO");
+  */
+
+  
+
   return (err);
+
+
 }
 
 BaseType_t init_display(void) {
