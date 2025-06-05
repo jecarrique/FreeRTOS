@@ -11,6 +11,11 @@
 #define BTN_UP BTN_2
 typedef enum {
   RELOJ_IDLE,
+  RELOJ_MENU_0,
+  RELOJ_MENU_1,
+  RELOJ_MENU_2,
+  CHANGE_HORA,
+  CHANGE_ALARM,
   CRONOMETRO_IDLE,
   CRONOMETRO_CONTANDO,
   CRONOMETRO_DETENIDO
@@ -73,11 +78,21 @@ void tskStates(void *parametros) {
     case RELOJ_IDLE: // por ahora no hacenada.
       ESP_LOGI("Estado Actual", "RELOJ_IDLE");
       if (BTN_ACT == ulInterruptStatus) {
+        states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
+        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+        update_display_gral(); // borro display general
+        update_display_menu_label(0);
+      }
+      break;
+      ///-----------------------------------------------------------------
+      case RELOJ_MENU_0:
+      if (BTN_ACT == ulInterruptStatus) {
         states = CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
         stopActionGreenLed();
         startActionRedLed();
         rst_time();
+        update_display_gral(); // borro display general
         reset_display_crono_labels();
 
         tiempo_comm_t tiempo;
@@ -87,7 +102,25 @@ void tskStates(void *parametros) {
                  update_display_gral(); // borro display general
         update_display_crono();
       }
+
       break;
+
+      ///-----------------------------------------------------------------
+      case RELOJ_MENU_1:
+      break;
+
+      ///-----------------------------------------------------------------
+      case RELOJ_MENU_2:
+      break;
+
+      ///-----------------------------------------------------------------
+      case CHANGE_HORA:
+      break;
+
+      ///-----------------------------------------------------------------
+      case CHANGE_ALARM:
+      break;
+
       ///-----------------------------------------------------------------
     case CRONOMETRO_IDLE:
       
