@@ -6,7 +6,8 @@
 #include "freertos/idf_additions.h"
 
 cuenta_tiempo_t clock_crono = {0, 0, 0, 0};
-cuenta_tiempo_t clock_hora = {0, 0, 0, 0};
+cuenta_tiempo_t clock_hora = {10, 15, 0, 0};
+cuenta_tiempo_t clock_alarma = {10, 20, 0, 0};
 
 #define ESPERA_MUTEX 1
 
@@ -19,6 +20,13 @@ BaseType_t init_time(void) {
     clock_hora.mutex = xSemaphoreCreateMutex();
     if (clock_hora.mutex != NULL) {
       err = 0; // OK
+      clock_alarma.mutex = xSemaphoreCreateMutex();
+      if (clock_alarma.mutex != NULL) {
+        err = 0; // OK
+      } 
+      else {
+        err = -1; // error
+      }
     }
     else {
       err = -1; // error
@@ -27,6 +35,35 @@ BaseType_t init_time(void) {
   return (err);
 }
 /// ---------------------------------------------------------------------------------
+// devuelve el tiempo actual del reloj
+BaseType_t get_alarma(tiempo_t *ptrTiempo) {
+  BaseType_t err = -1; // error
+  if (xSemaphoreTake(clock_alarma.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    ptrTiempo->dd = clock_alarma.dd;
+    ptrTiempo->hh = clock_alarma.hh;
+    ptrTiempo->mm = clock_alarma.mm;
+    ptrTiempo->ss = clock_alarma.ss;
+
+    if (xSemaphoreGive(clock_alarma.mutex) == pdTRUE) {
+      err = 0; // OK
+    }
+  }
+
+  return (err);
+}
+// establece un valor determinado para el reloj
+BaseType_t set_alarma(const tiempo_t *ptrTiempo) {
+  BaseType_t err = -1; // error
+  if (xSemaphoreTake(clock_alarma.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    clock_alarma.dd = ptrTiempo->dd;
+    clock_alarma.hh = ptrTiempo->hh;
+    clock_alarma.mm = ptrTiempo->mm;
+    clock_alarma.ss = ptrTiempo->ss;
+    if (xSemaphoreGive(clock_alarma.mutex) == pdTRUE) {
+      err = 0; // OK
+    }
+  }
+
 // incrementa minutos del reloj
 BaseType_t inc_hora(tiempo_t *ptrTiempo) {
   BaseType_t err = -1; // error
