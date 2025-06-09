@@ -51,6 +51,7 @@ BaseType_t get_alarma(tiempo_t *ptrTiempo) {
 
   return (err);
 }
+
 // establece un valor determinado para el reloj
 BaseType_t set_alarma(const tiempo_t *ptrTiempo) {
   BaseType_t err = -1; // error
@@ -63,6 +64,9 @@ BaseType_t set_alarma(const tiempo_t *ptrTiempo) {
       err = 0; // OK
     }
   }
+  return (err);
+}
+/// ---------------------------------------------------------------------------------
 
 // incrementa minutos del reloj
 BaseType_t inc_hora(tiempo_t *ptrTiempo) {
@@ -247,6 +251,7 @@ void tskContadorHora(void *parametros) {
   for (;;) {
     tiempo_comm_t tiempo;
     inc_hora(&tiempo.partes);
+    ESP_LOGW("Hora:", "%02d:%02d", tiempo.partes.hh, tiempo.partes.mm);
     BaseType_t xWasDelayed =
         xTaskDelayUntil((void *)ultimo_evento, pdMS_TO_TICKS(1000*60));
 

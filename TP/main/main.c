@@ -24,7 +24,7 @@ void app_main(void) {
 
   
   vTaskSuspendAll();  /// prevengo que las tareas tomen el CPU al ser creadas
-  
+
   xTaskCreate(tskStates, "ESTADOS", configMINIMAL_STACK_SIZE * 4, NULL,
     tskIDLE_PRIORITY + 2, NULL);
   hndlTskToSuspend = xTaskGetHandle( "ESTADOS");
@@ -50,6 +50,7 @@ void app_main(void) {
 
   vTaskDelay(pdMS_TO_TICKS(1000));
 
+
   //hndlTskToSuspend = xTaskGetHandle( "BLINK");
   //vTaskResume( hndlTskToSuspend);
 
@@ -58,6 +59,10 @@ void app_main(void) {
 
   hndlTskToSuspend = xTaskGetHandle( "ESTADOS");
   vTaskResume( hndlTskToSuspend);
+
+  // Largo reloj
+  xTaskCreate(tskContadorHora, "RELOJ", configMINIMAL_STACK_SIZE * 4, NULL,
+      tskIDLE_PRIORITY + 2, NULL);
 
 
   for (;;) {
