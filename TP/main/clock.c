@@ -26,7 +26,91 @@ BaseType_t init_time(void) {
   }
   return (err);
 }
+/// ---------------------------------------------------------------------------------
+// incrementa minutos del reloj
+BaseType_t inc_hora(tiempo_t *ptrTiempo) {
+  BaseType_t err = -1; // error
+  if (xSemaphoreTake(clock_hora.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+  //  if (clock_hora.dd >= 9) {
+  //    clock_hora.dd = 0;
+  //    if (clock_hora.ss >= 59) {
+  //      clock_hora.ss = 0;
+        if (clock_hora.mm >= 59) {
+          clock_hora.mm = 0;
+          if (clock_hora.hh >= 23) {
+            clock_hora.hh = 0;
+            /// overflow del contador...
+          } else {
+            ++clock_hora.hh;
+          }
+        } else {
+          ++clock_hora.mm;
+        }
+  //    } else {
+  //      ++clock_hora.ss;
+  //    }
+  //  } else {
+  //    ++clock_hora.dd;
+  //  }
+    ptrTiempo->dd = clock_hora.dd;
+    ptrTiempo->hh = clock_hora.hh;
+    ptrTiempo->mm = clock_hora.mm;
+    ptrTiempo->ss = clock_hora.ss;
+    if (xSemaphoreGive(clock_hora.mutex) == pdTRUE) {
+      err = 0; // OK
+    }
+  }
 
+  return (err);
+}
+// pone en cero el reloj
+BaseType_t rst_hora(void) {
+  BaseType_t err = -1; // error
+  if (xSemaphoreTake(clock_hora.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    clock_hora.dd = 0;
+    clock_hora.ss = 0;
+    clock_hora.mm = 0;
+    clock_hora.hh = 0;
+    if (xSemaphoreGive(clock_hora.mutex) == pdTRUE) {
+      err = 0; // OK
+    }
+  }
+
+  return (err);
+}
+// devuelve el tiempo actual del reloj
+BaseType_t get_hora(tiempo_t *ptrTiempo) {
+  BaseType_t err = -1; // error
+  if (xSemaphoreTake(clock_hora.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    ptrTiempo->dd = clock_hora.dd;
+    ptrTiempo->hh = clock_hora.hh;
+    ptrTiempo->mm = clock_hora.mm;
+    ptrTiempo->ss = clock_hora.ss;
+
+    if (xSemaphoreGive(clock_hora.mutex) == pdTRUE) {
+      err = 0; // OK
+    }
+  }
+
+  return (err);
+}
+// establece un valor determinado para el reloj
+BaseType_t set_hora(const tiempo_t *ptrTiempo) {
+  BaseType_t err = -1; // error
+  if (xSemaphoreTake(clock_hora.mutex, pdMS_TO_TICKS(ESPERA_MUTEX)) == pdTRUE) {
+    clock_hora.dd = ptrTiempo->dd;
+    clock_hora.hh = ptrTiempo->hh;
+    clock_hora.mm = ptrTiempo->mm;
+    clock_hora.ss = ptrTiempo->ss;
+    if (xSemaphoreGive(clock_hora.mutex) == pdTRUE) {
+      err = 0; // OK
+    }
+  }
+
+  return (err);
+}
+
+/// ---------------------------------------------------------------------------------
 // incrementa las decimas del reloj
 BaseType_t inc_crono(tiempo_t *ptrTiempo) {
   BaseType_t err = -1; // error
@@ -120,19 +204,20 @@ void vTimerCallback_ContadorCronometro(TimerHandle_t xTimer) {
 }
 
 /// === tarea que genera la cuenta en el cronometro ===
-void tskContadorCronometro(void *parametros) {
-  TickType_t *ultimo_evento = (TickType_t *)parametros;
-  // ultimo_evento = xTaskGetTickCount();
+void tskContadorHora(void *parametros) {
+  //TickType_t *ultimo_evento = (TickType_t *)parametros;
+  TickType_t ultimo_evento = xTaskGetTickCount();
   for (;;) {
     tiempo_comm_t tiempo;
-    inc_crono(&tiempo.partes);
+    inc_hora(&tiempo.partes);
     BaseType_t xWasDelayed =
-        xTaskDelayUntil((void *)ultimo_evento, pdMS_TO_TICKS(100));
+        xTaskDelayUntil((void *)ultimo_evento, pdMS_TO_TICKS(1000*60));
 
     if (xWasDelayed == pdFALSE)
       ESP_LOGW("ATENCION", "FALLO vTaskDelayUntil");
   }
 }
+
 
 void tskLaps(void *parametros) {
   QueueHandle_t *colaLaps = (QueueHandle_t *)parametros;

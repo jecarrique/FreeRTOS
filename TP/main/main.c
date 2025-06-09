@@ -48,7 +48,7 @@ void app_main(void) {
   
   xTaskResumeAll(); /// ahora si largamos
 
-  vTaskDelay(pdMS_TO_TICKS(2000));
+  vTaskDelay(pdMS_TO_TICKS(1000));
 
   //hndlTskToSuspend = xTaskGetHandle( "BLINK");
   //vTaskResume( hndlTskToSuspend);
