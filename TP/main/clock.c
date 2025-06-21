@@ -9,6 +9,8 @@ cuenta_tiempo_t clock_crono = {0, 0, 0, 0};
 cuenta_tiempo_t clock_hora = {10, 15, 0, 0};
 cuenta_tiempo_t clock_alarma = {10, 20, 0, 0};
 
+//SemaphoreHandle_t mutex_hide_hora;//         mutex_hide_hora = xSemaphoreCreateMutex();
+
 #define ESPERA_MUTEX 1
 
 // crea mutex y nicializa reloj en 0
@@ -247,13 +249,15 @@ void vTimerCallback_ContadorCronometro(TimerHandle_t xTimer) {
 /// === tarea que genera la cuenta en el cronometro ===
 void tskContadorHora(void *parametros) {
   //TickType_t *ultimo_evento = (TickType_t *)parametros;
-  TickType_t ultimo_evento = xTaskGetTickCount();
+  TickType_t ultimo_evento;
+  ultimo_evento = xTaskGetTickCount();
   for (;;) {
     tiempo_comm_t tiempo;
     inc_hora(&tiempo.partes);
     ESP_LOGW("Hora:", "%02d:%02d", tiempo.partes.hh, tiempo.partes.mm);
+    update_display_hora();
     BaseType_t xWasDelayed =
-        xTaskDelayUntil((void *)ultimo_evento, pdMS_TO_TICKS(1000*60));
+        xTaskDelayUntil(&ultimo_evento, pdMS_TO_TICKS(1000));
 
     if (xWasDelayed == pdFALSE)
       ESP_LOGW("ATENCION", "FALLO vTaskDelayUntil");
@@ -285,7 +289,7 @@ void tskLaps(void *parametros) {
         laps_tiempo[1] = laps_tiempo[0];
         laps_tiempo[0] = tiempo;
         for (int i = 0; i < 3; i++) {
-          update_display_crono_label(i, laps_tiempo[i]);
+          update_display_crono_laps(i, laps_tiempo[i]);
         }
       
 

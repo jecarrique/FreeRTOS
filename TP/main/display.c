@@ -31,6 +31,9 @@ static lv_obj_t * lblMenu;
 static lv_obj_t * lblHora;
 static lv_obj_t * lblAlarma;
 
+SemaphoreHandle_t mutex_hide_hora;
+static bool hide_hora;
+
 BaseType_t init_lbl_alarma() {
 
   BaseType_t err = -1; // error
@@ -240,6 +243,8 @@ BaseType_t init_lbl_gral(void) {
 
 BaseType_t init_display(void) {
   BaseType_t err = -1; // error
+  mutex_hide_hora = xSemaphoreCreateMutex(); // creo mutex
+  hide_hora = true;
   bool mutex = lvgl_port_lock(100);
   if (mutex) {
     err = init_lbl_laps();
@@ -309,7 +314,9 @@ BaseType_t update_display_gral(void) {
     lv_label_set_text(lblLap0, ""); // borro texto
     lv_label_set_text(lblLap1, ""); // borro texto
     lv_label_set_text(lblLap2, ""); // borro texto
-
+    lv_label_set_text(lblHora, ""); // borro texto
+    lv_label_set_text(lblAlarma, ""); // borro texto
+    
 
     lvgl_port_unlock();
     err = 0; // OK
@@ -318,6 +325,61 @@ BaseType_t update_display_gral(void) {
     ESP_LOGI("err", "mutex del display no disponible");
   }
 
+  return (err);
+}
+BaseType_t show_display_hora(void)
+{
+  BaseType_t err = -1; // error
+  
+  if( xSemaphoreTake( mutex_hide_hora, pdMS_TO_TICKS(1) ) == pdTRUE )
+  {
+    hide_hora = false;
+    ESP_LOGI("hide_hora", "false");
+
+    xSemaphoreGive( mutex_hide_hora );
+    err = 1;
+  }
+
+  return (err);
+
+}
+BaseType_t hide_display_hora(void) {
+  BaseType_t err = -1; // error
+
+  if( xSemaphoreTake( mutex_hide_hora, pdMS_TO_TICKS(1) ) == pdTRUE )
+  {
+    hide_hora = true;
+    ESP_LOGI("hide_hora", "true");
+    xSemaphoreGive( mutex_hide_hora );
+    err = 1;
+  }
+
+  return (err);
+
+}
+BaseType_t update_display_hora(void)
+{
+  BaseType_t err = -1; // error
+if( xSemaphoreTake( mutex_hide_hora, pdMS_TO_TICKS(1) ) == pdTRUE ) {
+  if (false == hide_hora)    {
+    bool mutex = lvgl_port_lock(0);
+    if (mutex) {
+
+      tiempo_comm_t tiempo;
+      get_hora(&tiempo.partes);
+      lv_label_set_text_fmt(lblHora, "%02d:%02d", tiempo.partes.hh,
+                            tiempo.partes.mm);
+
+      lvgl_port_unlock();
+      err = 0; // OK
+
+    } else {
+      ESP_LOGI("err", "mutex del display no disponible");
+    }
+  }
+  xSemaphoreGive( mutex_hide_hora );
+
+}
   return (err);
 }
 
@@ -341,7 +403,7 @@ BaseType_t update_display_crono(void) {
   return (err);
 }
 
-BaseType_t reset_display_crono_labels(void) {
+BaseType_t reset_display_crono_laps(void) {
   BaseType_t err = -1; // error
   bool mutex = lvgl_port_lock(0);
   if (mutex) {
@@ -365,7 +427,7 @@ BaseType_t reset_display_crono_labels(void) {
   return (err);
 }
 
-BaseType_t update_display_crono_label(unsigned int label_num, tiempo_comm_t tiempo) {
+BaseType_t update_display_crono_laps(unsigned int label_num, tiempo_comm_t tiempo) {
   BaseType_t err = -1; // error
   bool mutex = lvgl_port_lock(0);
   if (mutex) {
@@ -394,7 +456,7 @@ BaseType_t update_display_crono_label(unsigned int label_num, tiempo_comm_t tiem
 
 /// --- Menu ---
 
-BaseType_t update_display_menu_label(unsigned int menu_selsect) {
+BaseType_t update_display_menu(unsigned int menu_selsect) {
   BaseType_t err = -1; // error
   
   bool mutex = lvgl_port_lock(0);
@@ -408,7 +470,7 @@ BaseType_t update_display_menu_label(unsigned int menu_selsect) {
         break;
 
       case 1:
-        lv_label_set_text(lblMenu, "_Iniciar Cronometro \n_Configurar Alarma \n_Actualizar Hora");
+        lv_label_set_text(lblMenu, "_Iniciar Cronometro \n>Configurar Alarma \n_Actualizar Hora");
         break;
 
       case 2:

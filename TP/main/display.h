@@ -7,11 +7,16 @@ BaseType_t init_display(void);
 BaseType_t update_display(void);
 BaseType_t update_display_gral(void);
 
-BaseType_t update_display_crono(void);
-BaseType_t reset_display_crono_labels(void);
-BaseType_t update_display_crono_label(unsigned int label_num, tiempo_comm_t tiempo);
+BaseType_t update_display_hora(void);
+BaseType_t show_display_hora(void);
+BaseType_t hide_display_hora(void);
 
-BaseType_t update_display_menu_label(unsigned int menu_selsect);
+
+BaseType_t update_display_crono(void);
+BaseType_t reset_display_crono_laps(void);
+BaseType_t update_display_crono_laps(unsigned int label_num, tiempo_comm_t tiempo);
+
+BaseType_t update_display_menu(unsigned int menu_selsect);
 
 
 

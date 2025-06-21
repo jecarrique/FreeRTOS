@@ -82,7 +82,8 @@ void tskStates(void *parametros) {
         states = RELOJ_ON; //CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "RELOJ_ON");
         update_display_gral(); // borro display general
-        update_display_menu_label(0);
+        show_display_hora(); // muestro la hora
+        update_display_hora();//update_display_menu(0);
       }
       break;
             ///-----------------------------------------------------------------
@@ -91,12 +92,17 @@ void tskStates(void *parametros) {
     if (BTN_ACT == ulInterruptStatus) {
       states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
       ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+      hide_display_hora(); // no escribo la hora...
       update_display_gral(); // borro display general
-      update_display_menu_label(0);
+      update_display_menu(0);
+
+
     }
     break;
       ///-----------------------------------------------------------------
       case RELOJ_MENU_0:
+      ESP_LOGI("Estado Actual", "RELOJ_MENU_0");
+
       if (BTN_ACT == ulInterruptStatus) {
         states = CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
@@ -104,7 +110,7 @@ void tskStates(void *parametros) {
         startActionRedLed();
         rst_crono();
         update_display_gral(); // borro display general
-        reset_display_crono_labels();
+        reset_display_crono_laps();
 
         tiempo_comm_t tiempo;
         get_crono(&tiempo.partes);
@@ -114,14 +120,55 @@ void tskStates(void *parametros) {
         update_display_crono();
       }
 
+      if (BTN_UP == ulInterruptStatus) {
+        states = RELOJ_MENU_2;
+        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_2");
+        update_display_gral(); // borro display general
+        update_display_menu(2);
+      } else if (BTN_DOWN == ulInterruptStatus) {
+          states = RELOJ_MENU_1;
+          ESP_LOGI("Estado Nuevo", "RELOJ_MENU_1");
+          update_display_gral(); // borro display general
+          update_display_menu(1);
+      }
       break;
 
       ///-----------------------------------------------------------------
       case RELOJ_MENU_1:
+      ESP_LOGI("Estado Actual", "RELOJ_MENU_1");
+
+
+      if (BTN_UP == ulInterruptStatus) {
+        states = RELOJ_MENU_0;
+        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+        update_display_gral(); // borro display general
+        update_display_menu(0);
+      } else if (BTN_DOWN == ulInterruptStatus) {
+          states = RELOJ_MENU_2;
+          ESP_LOGI("Estado Nuevo", "RELOJ_MENU_2");
+          update_display_gral(); // borro display general
+          update_display_menu(2);
+      }
+
       break;
 
       ///-----------------------------------------------------------------
       case RELOJ_MENU_2:
+      ESP_LOGI("Estado Actual", "RELOJ_MENU_2");
+
+
+      if (BTN_UP == ulInterruptStatus) {
+        states = RELOJ_MENU_1;
+        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_1");
+        update_display_gral(); // borro display general
+        update_display_menu(1);
+      } else if (BTN_DOWN == ulInterruptStatus) {
+          states = RELOJ_MENU_0;
+          ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+          update_display_gral(); // borro display general
+          update_display_menu(0);
+      }
+
       break;
 
       ///-----------------------------------------------------------------
@@ -137,7 +184,7 @@ void tskStates(void *parametros) {
       
       ESP_LOGI("Estado Actual", "CRONOMETRO_IDLE");
       rst_crono(); // Borro valr del contador
-      reset_display_crono_labels();
+      reset_display_crono_laps();
 
       if (BTN_UP == ulInterruptStatus) {
         states = CRONOMETRO_CONTANDO;
@@ -147,11 +194,12 @@ void tskStates(void *parametros) {
         ESP_LOGI("Estado Nuevo", "CRONOMETRO_CONTANDO");
       }
       if (BTN_ACT == ulInterruptStatus) {
-        states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
-        ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
+        states = RELOJ_ON; //CRONOMETRO_IDLE;
+        ESP_LOGI("Estado Nuevo", "RELOJ_ON");
         update_display_gral(); // borro display general
-        update_display_menu_label(0);
-      }  
+        show_display_hora(); // muestro la hora
+        update_display_hora();
+          }  
       break;
         ///-----------------------------------------------------------------
       case CRONOMETRO_CONTANDO:
@@ -204,7 +252,7 @@ void tskStates(void *parametros) {
           states = CRONOMETRO_IDLE;
           ESP_LOGI("Estado Nuevo", "CRONOMETRO_IDLE");
           rst_crono();
-          reset_display_crono_labels();
+          reset_display_crono_laps();
           tiempo_comm_t tiempo;
           get_crono(&tiempo.partes);
           ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,

@@ -1,8 +1,13 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+
+
+
+
 BaseType_t init_time( void ); // crea mutex y inicializa reloj en 0 pa
 
+static bool hide_hora = true;
 
 
 
