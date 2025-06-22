@@ -365,10 +365,18 @@ if( xSemaphoreTake( mutex_hide_hora, pdMS_TO_TICKS(1) ) == pdTRUE ) {
     bool mutex = lvgl_port_lock(0);
     if (mutex) {
 
-      tiempo_comm_t tiempo;
+      tiempo_comm_t tiempo, alarma;
       get_hora(&tiempo.partes);
       lv_label_set_text_fmt(lblHora, "%02d:%02d", tiempo.partes.hh,
                             tiempo.partes.mm);
+      get_alarma(&alarma.partes);
+      if( (alarma.partes.hh == tiempo.partes.hh) && (alarma.partes.mm == tiempo.partes.mm) ) {
+        lv_label_set_text(lblAlarma, "ALARMA RING");
+      }
+      else {
+        lv_label_set_text_fmt(lblAlarma, "Alarma: %02d:%02d", alarma.partes.hh,
+        alarma.partes.mm);
+      }                
 
       lvgl_port_unlock();
       err = 0; // OK
