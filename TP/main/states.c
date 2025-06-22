@@ -131,6 +131,13 @@ void tskStates(void *parametros) {
     ///-----------------------------------------------------------------
     case RELOJ_MENU_1:
       ESP_LOGI("Estado Actual", "RELOJ_MENU_1");
+      if (BTN_ACT == ulInterruptStatus) {
+        states = CHANGE_ALARM;
+        ESP_LOGI("Estado Nuevo", "CHANGE_ALARMA");
+        delete_display(); // borro display general
+        bool test = update_display_chng_alarma(ulInterruptStatus);
+
+      }
 
       if (BTN_UP == ulInterruptStatus) {
         states = RELOJ_MENU_0;
@@ -189,6 +196,19 @@ void tskStates(void *parametros) {
 
       ///-----------------------------------------------------------------
       case CHANGE_ALARM:
+      ESP_LOGI("Estado Actual", "CHANGE_ALARM");
+      hide_display_hora();   // NO muestro la hora
+      delete_display();      // borro display general
+      bool test2 = update_display_chng_alarma(ulInterruptStatus);
+        if (true == test2) {
+          //if (BTN_ACT == ulInterruptStatus) {
+            states = RELOJ_ON; // CRONOMETRO_IDLE;
+            ESP_LOGI("Estado Nuevo", "RELOJ_ON");
+            delete_display();      // borro display general
+            show_display_hora();   // muestro la hora
+            update_display_hora(); // update_display_menu(0);
+          //}
+        }
         break;
 
         ///-----------------------------------------------------------------

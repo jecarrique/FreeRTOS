@@ -454,6 +454,87 @@ bool update_display_chng_hora(uint32_t key) {
   return (exit);
 }
 
+
+bool update_display_chng_alarma(uint32_t key) {
+  bool exit = false;
+  static uint8_t st_cnt = 0; // 0 es idle, 1 es horas, 2 es minutos
+  static uint8_t hh_tmp = 0;
+  static uint8_t mm_tmp = 0;
+
+  switch (st_cnt) {
+  case 0:
+    ESP_LOGI("CHNG_ALARM", "Case 0");
+
+    st_cnt = 1;
+    tiempo_comm_t tiempo;
+    get_alarma(&tiempo.partes);
+    hh_tmp = tiempo.partes.hh;
+    mm_tmp = tiempo.partes.mm;
+    break;
+  case 1: // horas
+    ESP_LOGI("CHNG_ALARM", "Case 1");
+    switch (key) {
+    case BTN_ACT:
+      st_cnt = 2;
+      break;
+    case BTN_UP:
+      hh_tmp++;
+      if (hh_tmp == 24) {
+        hh_tmp = 0;
+      }
+      break;
+    case BTN_DOWN:
+      hh_tmp--;
+      if (hh_tmp == 255) {
+        hh_tmp = 23;
+      }
+      break;
+    }
+    break;
+  case 2: // minutos
+    ESP_LOGI("CHNG_ALARM", "Case 2");
+    switch (key) {
+    case BTN_ACT:
+      st_cnt = 0;
+      exit = true;
+
+      tiempo_comm_t tiempo;
+      tiempo.partes.hh = hh_tmp;
+      tiempo.partes.mm = mm_tmp;
+      set_alarma(&tiempo.partes);
+      break;
+    case BTN_UP:
+      mm_tmp++;
+      if (mm_tmp == 60) {
+        mm_tmp = 0;
+      }
+      break;
+    case BTN_DOWN:
+      mm_tmp--;
+      if (mm_tmp == 255) {
+        mm_tmp = 59;
+      }
+      break;
+    }
+    break;
+  }
+ 
+  bool mutex = lvgl_port_lock(0);
+
+  if (mutex) {
+
+    lv_label_set_text_fmt(lblChngTime, "C. Alarm\n %02d:%02d", hh_tmp, mm_tmp);
+
+    lvgl_port_unlock();
+    // err = 0; // OK
+
+  } else {
+    ESP_LOGI("err", "mutex del display no disponible");
+  }
+  return (exit);
+}
+
+
 BaseType_t update_display_hora(void) {
   BaseType_t err = -1; // error
   if (xSemaphoreTake(mutex_hide_hora, pdMS_TO_TICKS(1)) == pdTRUE) {
