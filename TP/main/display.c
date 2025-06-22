@@ -290,7 +290,7 @@ BaseType_t update_display(void) {
   return (err);
 }
 
-BaseType_t update_display_gral(void) {
+BaseType_t delete_display(void) {
   BaseType_t err = -1; // error
   bool mutex = lvgl_port_lock(0);
   if (mutex) {

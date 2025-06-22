@@ -5,7 +5,7 @@ BaseType_t config_display(void);
 
 BaseType_t init_display(void);
 BaseType_t update_display(void);
-BaseType_t update_display_gral(void);
+BaseType_t delete_display(void);
 
 BaseType_t update_display_hora(void);
 BaseType_t show_display_hora(void);

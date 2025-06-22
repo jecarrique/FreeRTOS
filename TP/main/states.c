@@ -81,7 +81,7 @@ void tskStates(void *parametros) {
       if (BTN_ACT == ulInterruptStatus) {
         states = RELOJ_ON; //CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "RELOJ_ON");
-        update_display_gral(); // borro display general
+        delete_display(); // borro display general
         show_display_hora(); // muestro la hora
         update_display_hora();//update_display_menu(0);
       }
@@ -93,7 +93,7 @@ void tskStates(void *parametros) {
       states = RELOJ_MENU_0; //CRONOMETRO_IDLE;
       ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
       hide_display_hora(); // no escribo la hora...
-      update_display_gral(); // borro display general
+      delete_display(); // borro display general
       update_display_menu(0);
 
 
@@ -109,26 +109,26 @@ void tskStates(void *parametros) {
         stopActionGreenLed();
         startActionRedLed();
         rst_crono();
-        update_display_gral(); // borro display general
+        delete_display(); // borro display general
         reset_display_crono_laps();
 
         tiempo_comm_t tiempo;
         get_crono(&tiempo.partes);
         ESP_LOGW("cuenta actual", "%02d:%02d:%01d", tiempo.partes.mm,
                  tiempo.partes.ss, tiempo.partes.dd);
-                 update_display_gral(); // borro display general
+                 delete_display(); // borro display general
         update_display_crono();
       }
 
       if (BTN_UP == ulInterruptStatus) {
         states = RELOJ_MENU_2;
         ESP_LOGI("Estado Nuevo", "RELOJ_MENU_2");
-        update_display_gral(); // borro display general
+        delete_display(); // borro display general
         update_display_menu(2);
       } else if (BTN_DOWN == ulInterruptStatus) {
           states = RELOJ_MENU_1;
           ESP_LOGI("Estado Nuevo", "RELOJ_MENU_1");
-          update_display_gral(); // borro display general
+          delete_display(); // borro display general
           update_display_menu(1);
       }
       break;
@@ -141,12 +141,12 @@ void tskStates(void *parametros) {
       if (BTN_UP == ulInterruptStatus) {
         states = RELOJ_MENU_0;
         ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
-        update_display_gral(); // borro display general
+        delete_display(); // borro display general
         update_display_menu(0);
       } else if (BTN_DOWN == ulInterruptStatus) {
           states = RELOJ_MENU_2;
           ESP_LOGI("Estado Nuevo", "RELOJ_MENU_2");
-          update_display_gral(); // borro display general
+          delete_display(); // borro display general
           update_display_menu(2);
       }
 
@@ -160,12 +160,12 @@ void tskStates(void *parametros) {
       if (BTN_UP == ulInterruptStatus) {
         states = RELOJ_MENU_1;
         ESP_LOGI("Estado Nuevo", "RELOJ_MENU_1");
-        update_display_gral(); // borro display general
+        delete_display(); // borro display general
         update_display_menu(1);
       } else if (BTN_DOWN == ulInterruptStatus) {
           states = RELOJ_MENU_0;
           ESP_LOGI("Estado Nuevo", "RELOJ_MENU_0");
-          update_display_gral(); // borro display general
+          delete_display(); // borro display general
           update_display_menu(0);
       }
 
@@ -196,7 +196,7 @@ void tskStates(void *parametros) {
       if (BTN_ACT == ulInterruptStatus) {
         states = RELOJ_ON; //CRONOMETRO_IDLE;
         ESP_LOGI("Estado Nuevo", "RELOJ_ON");
-        update_display_gral(); // borro display general
+        delete_display(); // borro display general
         show_display_hora(); // muestro la hora
         update_display_hora();
           }  
