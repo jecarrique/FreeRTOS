@@ -330,16 +330,15 @@ BaseType_t delete_display(void) {
     // get_time(&tiempo.partes);
     //  lv_label_set_text_fmt(lblCrono, "%02d:%02d:%01d", tiempo.partes.mm,
     //                        tiempo.partes.ss, tiempo.partes.dd);
-    lv_label_set_text(lblSplash, ""); // borro texto inicial
-    lv_label_set_text(lblMenu, "");   // borro texto
-    lv_label_set_text(lblCrono, "");  // borro texto
-    lv_label_set_text(lblLap0, "");   // borro texto
-    lv_label_set_text(lblLap1, "");   // borro texto
-    lv_label_set_text(lblLap2, "");   // borro texto
-    lv_label_set_text(lblHora, "");   // borro texto
-    lv_label_set_text(lblAlarma, ""); // borro texto
+    lv_label_set_text(lblSplash, "");   // borro texto inicial
+    lv_label_set_text(lblMenu, "");     // borro texto
+    lv_label_set_text(lblCrono, "");    // borro texto
+    lv_label_set_text(lblLap0, "");     // borro texto
+    lv_label_set_text(lblLap1, "");     // borro texto
+    lv_label_set_text(lblLap2, "");     // borro texto
+    lv_label_set_text(lblHora, "");     // borro texto
+    lv_label_set_text(lblAlarma, "");   // borro texto
     lv_label_set_text(lblChngTime, ""); // borro texto
-
 
     lvgl_port_unlock();
     err = 0; // OK
@@ -384,6 +383,8 @@ bool update_display_chng_hora(uint32_t key) {
 
   switch (st_cnt) {
   case 0:
+    ESP_LOGI("CHNG_HORA", "Case 0");
+
     st_cnt = 1;
     tiempo_comm_t tiempo;
     get_hora(&tiempo.partes);
@@ -391,13 +392,29 @@ bool update_display_chng_hora(uint32_t key) {
     mm_tmp = tiempo.partes.mm;
     break;
   case 1: // horas
-
-    if (key == BTN_ACT) {
+    ESP_LOGI("CHNG_HORA", "Case 1");
+    switch (key) {
+    case BTN_ACT:
       st_cnt = 2;
+      break;
+    case BTN_UP:
+      hh_tmp++;
+      if (hh_tmp == 24) {
+        hh_tmp = 0;
+      }
+      break;
+    case BTN_DOWN:
+      hh_tmp--;
+      if (hh_tmp == 255) {
+        hh_tmp = 23;
+      }
+      break;
     }
     break;
   case 2: // minutos
-    if (key == BTN_ACT) {
+    ESP_LOGI("CHNG_HORA", "Case 2");
+    switch (key) {
+    case BTN_ACT:
       st_cnt = 0;
       exit = true;
 
@@ -405,16 +422,28 @@ bool update_display_chng_hora(uint32_t key) {
       tiempo.partes.hh = hh_tmp;
       tiempo.partes.mm = mm_tmp;
       set_hora(&tiempo.partes);
+      break;
+    case BTN_UP:
+      mm_tmp++;
+      if (mm_tmp == 60) {
+        mm_tmp = 0;
+      }
+      break;
+    case BTN_DOWN:
+      mm_tmp--;
+      if (mm_tmp == 255) {
+        mm_tmp = 59;
+      }
+      break;
     }
     break;
   }
-
+ 
   bool mutex = lvgl_port_lock(0);
 
   if (mutex) {
 
-    lv_label_set_text_fmt(lblChngTime, "C. Hora\n %02d:%02d", hh_tmp,
-                          mm_tmp);
+    lv_label_set_text_fmt(lblChngTime, "C. Hora\n %02d:%02d", hh_tmp, mm_tmp);
 
     lvgl_port_unlock();
     // err = 0; // OK

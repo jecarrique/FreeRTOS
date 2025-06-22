@@ -20,6 +20,8 @@ BaseType_t update_display_menu(unsigned int menu_selsect);
 
 bool update_display_chng_hora(uint32_t key);
 
+bool update_display_chng_alarm(uint32_t key);
+
 
 
 
