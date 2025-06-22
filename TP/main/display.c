@@ -20,7 +20,7 @@ BaseType_t config_display(void) {
 
 //lv_obj_t *label_clock;
 //static lv_obj_t *label;
-static lv_obj_t *lblGral;
+static lv_obj_t *lblSplash;
 static lv_obj_t *lblCrono;
 static lv_obj_t *lblLap0;
 static lv_obj_t *lblLap1;
@@ -192,7 +192,7 @@ BaseType_t init_lbl_crono(void) {
   return (err);
 }
 
-BaseType_t init_lbl_gral(void) {
+BaseType_t init_lbl_splash(void) {
   BaseType_t err = -1; // error
 
   lv_obj_t *scr = lv_disp_get_scr_act(getDisplay());
@@ -210,7 +210,7 @@ BaseType_t init_lbl_gral(void) {
     ESP_LOGI("err", "label note created");
   }
 
-  lblGral = label_tmp;
+  lblSplash = label_tmp;
 
   lv_style_init(&style);
 
@@ -222,15 +222,15 @@ BaseType_t init_lbl_gral(void) {
   //lv_style_set_text_color(&style, lv_color_white());
   //lv_style_set_text_color(&style, lv_color_black());
   //lv_style_set_bg_color(&style,lv_color_black());
-  lv_obj_add_style(lblGral, &style, 0); // <--- obj is the label
+  lv_obj_add_style(lblSplash, &style, 0); // <--- obj is the label
 
   //lv_label_set_long_mode(label,
   //                       LV_LABEL_LONG_CLIP); // LV_LABEL_LONG_SCROLL_CIRCULAR);
- lv_obj_set_pos(lblGral, 0,
+ lv_obj_set_pos(lblSplash, 0,
   0); // el origen esta arriba a la izquierda
   //char texto[] = "Hora 88:88\nAlarm 88:88";
   char texto[] = "Reloj(A) y Crono\nPresiones Accion";
-  lv_label_set_text(lblGral, texto);
+  lv_label_set_text(lblSplash, texto);
   ESP_LOGI("display init", "escribo CRONOMETRO");
   
 
@@ -249,7 +249,7 @@ BaseType_t init_display(void) {
   if (mutex) {
     err = init_lbl_laps();
     err = init_lbl_crono();
-    err = init_lbl_gral();
+    err = init_lbl_splash();
     err = init_lbl_menu();
     err = init_lbl_hora();
     err = init_lbl_alarma();
@@ -308,7 +308,7 @@ BaseType_t delete_display(void) {
     //get_time(&tiempo.partes);
     // lv_label_set_text_fmt(lblCrono, "%02d:%02d:%01d", tiempo.partes.mm,
     //                       tiempo.partes.ss, tiempo.partes.dd);
-    lv_label_set_text(lblGral, ""); // borro texto inicial
+    lv_label_set_text(lblSplash, ""); // borro texto inicial
     lv_label_set_text(lblMenu, ""); // borro texto
     lv_label_set_text(lblCrono, ""); // borro texto
     lv_label_set_text(lblLap0, ""); // borro texto
