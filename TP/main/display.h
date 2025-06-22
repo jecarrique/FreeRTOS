@@ -18,6 +18,8 @@ BaseType_t update_display_crono_laps(unsigned int label_num, tiempo_comm_t tiemp
 
 BaseType_t update_display_menu(unsigned int menu_selsect);
 
+bool update_display_chng_hora(uint32_t key);
+
 
 
 
